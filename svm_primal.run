@@ -1,0 +1,21 @@
+# svm_primal.run
+
+# Set the solver (ensure the solver supports quadratic programming)
+option solver minos;
+
+# Load the primal model and data
+model primal.mod;
+data .\processed_data\data_processed_100.dat;
+
+# Assign value to parameter C
+let C := 1;
+
+# Solve the model
+solve;
+
+# Display results
+display w, b;
+
+# Optionally, write results to a file
+# printf {j in 1..dim}: "%f\n", w[j] > "w_primal.txt";
+# printf "%f\n", b > "b_primal.txt";

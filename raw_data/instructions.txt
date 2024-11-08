@@ -1,0 +1,9 @@
+Generated using replit.com as a bash environment.
+
+Then run a script with the following lines:
+
+chmod +x gensvmdat
+./gensvmdat data_10000.dat 10000 5
+
+
+(name_script number_of_points seed)
