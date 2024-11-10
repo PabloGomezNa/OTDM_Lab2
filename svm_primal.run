@@ -1,21 +1,46 @@
-# svm_primal.run
+#.Run file that implements the PRIMAL SVM methods and calculates the accuracy
+reset;
 
-# Set the solver (ensure the solver supports quadratic programming)
+# ========================================
+# 1. Train
+# ========================================
+
+#Select the solver to use
 option solver minos;
 
-# Load the primal model and data
-model primal.mod;
-data .\processed_data\data_processed_100.dat;
+model primal.mod; #Load our model
+data .\processed_data\data_train_800.dat; #Load the training data
+	
+let C := 0.1; #Set regularization parameter
 
-# Assign value to parameter C
-let C := 1;
+solve; #Solve the optm. problem
+display w, b; #Display the results, the weight and 
 
-# Solve the model
-solve;
 
-# Display results
-display w, b;
+# ========================================
+# 2. Test 
+# ========================================
 
-# Optionally, write results to a file
-# printf {j in 1..dim}: "%f\n", w[j] > "w_primal.txt";
-# printf "%f\n", b > "b_primal.txt";
+#Load the test data
+data .\processed_data\data_test_200.dat;
+
+#Declare new variables we will use
+param correct_predictions;
+param accuracy;
+
+#Make predictios using weights obtained from training
+param y_pred {i in N_test};
+
+for {i in N_test} {
+    let y_pred[i] := if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1;
+}
+
+
+# Calculate the number of correct predictions to calculate precision
+let correct_predictions := sum {i in N_test} (if y_test[i] = y_pred[i] then 1 else 0);
+
+# Calculate precision
+let accuracy := correct_predictions / card(N_test);
+
+# Display  correct predictions and accuracy
+display correct_predictions, accuracy;

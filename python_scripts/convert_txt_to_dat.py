@@ -69,6 +69,12 @@ def main(input_file, output_file):
     except FileNotFoundError:
         print(f"Error: The file {input_file} does not exist.")
 
+
+#py .\convert_txt_to_dat.py .\raw_data\data_100.dat .\processed_data\data_processed_100.dat
+#py .\convert_txt_to_dat.py .\raw_data\data_500.dat .\processed_data\data_processed_500.dat
+#py .\convert_txt_to_dat.py .\raw_data\data_1000.dat .\processed_data\data_processed_1000.dat
+#py .\convert_txt_to_dat.py .\raw_data\data_10000.dat .\processed_data\data_processed_10000.dat
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python convert_to_ampl_dat.py input.txt output.dat")

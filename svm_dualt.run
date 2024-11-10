@@ -1,0 +1,43 @@
+reset;
+
+model dualt.mod;
+data .\processed_data\data_train_800.dat; #Load the training data
+option solver cplex;
+solve;
+
+param count;
+param gamma;
+param gamma_sum;
+
+let gamma_sum := 0;
+let count := 0;
+
+for {i in 1..m} {
+    if nu - 0.025 > l[i] > 1e-3 then {
+        let gamma_sum := gamma_sum + 1 / y[i] - sum {j in 1..n} w[j] * A[i, j];
+        let count := count + 1;
+    }
+}
+
+let gamma := gamma_sum / count;
+display w, gamma;
+
+reset data nu, m, n, A, y;
+data .\processed_data\data_test_200.dat; #Load the training data
+
+param y_pred {1..m};
+
+let {i in 1..m} y_pred[i] := gamma + sum {j in 1..n} w[j] * A[i, j];
+let {i in 1..m} y_pred[i] := if y_pred[i] <= 0 then -1 else 1;
+
+param errors;
+let errors := 0;
+
+for {i in 1..m} {
+    if y_pred[i] != y[i] then {
+        let errors := errors + 1;
+    }
+}
+
+param acc = (m - errors) / m;
+display errors, acc;
