@@ -73,9 +73,9 @@ def split_data(N, y, X, test_size):
 
 def main():
     # File paths
-    input_file = r'.\processed_data\data_processed_10000.dat'  # Replace with your input data file name
-    train_file = r'.\processed_data\data_train_8000.dat'
-    test_file = r'.\processed_data\data_test_2000.dat'
+    input_file = r'.\processed_data\Student_performance_data.dat'  # Replace with your input data file name
+    train_file = r'.\processed_data\Student_performance_train_data.dat'
+    test_file = r'.\processed_data\Student_performance_test_data.dat'
 
     test_prop = 0.2
 

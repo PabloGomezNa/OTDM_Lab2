@@ -13,9 +13,10 @@ option solver minos;
 
 model dual.mod; #Load our model
 #data .\processed_data\data_train_800.dat; #Load the training data
-data .\processed_data\data_train_8000.dat; #Load the training data
+#data .\processed_data\data_train_8000.dat; #Load the training data
+data .\processed_data\Student_performance_train_data.dat; #Load the training data
 	
-let C := 0.1; #Set regularization parameter
+let C := 1; #Set regularization parameter
 
 solve; #Solve the optm. problem
 # Compute w from alpha, y, and X
@@ -60,7 +61,8 @@ display w, b;
 # ========================================
 
 #data .\processed_data\data_test_200.dat; #Load the training data
-data .\processed_data\data_test_2000.dat; #Load the training data
+#data .\processed_data\data_test_2000.dat; #Load the training data
+data .\processed_data\Student_performance_test_data.dat; #Load the training data
 
 # Make predictions using computed w and b
 param y_pred {i in N_test};
