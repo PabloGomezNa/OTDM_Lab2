@@ -2,23 +2,41 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # Import 3D plotting tools
 from sklearn.decomposition import PCA
+import pandas as pd
 
-data = np.loadtxt(r'.\raw_data\data_100test.dat')  # Replace 'data.txt' with your data file name if different
+# Read the data using pandas
+df = pd.read_csv(r'.\raw_data\data_1000.dat', sep='\s+', header=None)
+
+# Remove asterisks from the last column
+df[4] = df[4].astype(str).str.replace('*', '').astype(float)
+
+# Separate features and labels
+X = df.iloc[:, :4].values  # First 4 columns
+y = df.iloc[:, 4].values   # Last column
+
+# def converter(s):
+#     return float(s.strip().replace('*', ' '))
+
+# data = np.loadtxt(r'.\raw_data\data_1000.dat', converters={4: converter})
+
+# #data = np.loadtxt(r'.\raw_data\data_1000.dat')  # Replace 'data.txt' with your data file name if different
 
 
 
 
-# Assuming your data is already loaded in the variable `data`
-X = data[:, :4]  # First 4 columns are features
-y = data[:, 4]   # Last column is the label
+# # Assuming your data is already loaded in the variable `data`
+# X = data[:, :4]  # First 4 columns are features
+# y = data[:, 4]   # Last column is the label
+
 
 # Apply PCA to reduce dimensions to 3 for visualization
 pca = PCA(n_components=3)
 X_pca = pca.fit_transform(X)
 
 # Project the weights from AMPL solution into the PCA space (first three dimensions)
-w_ampl = np.array([2.73514, 1.50309, 2.32227, 2.28589])
-b_ampl = -4.3102
+w_ampl = np.array([2.14555, 2.16028, 2.0836, 2.17814])
+b_ampl = -4.34526
+
 
 # Transform the weights to the PCA space
 w_pca = pca.components_.dot(w_ampl)

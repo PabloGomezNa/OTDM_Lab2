@@ -1,13 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+import pandas as pd
+# Read the data using pandas
+df = pd.read_csv(r'.\raw_data\data_1000.dat', sep='\s+', header=None)
 
-data = np.loadtxt(r'.\raw_data\data_100test.dat')  # Replace 'data.txt' with your data file name if different
+# Remove asterisks from the last column
+df[4] = df[4].astype(str).str.replace('*', '').astype(float)
 
-
-# Assuming your data is already loaded in the variable `data`
-X = data[:, :4]  # First 4 columns are features
-y = data[:, 4]   # Last column is the label
+# Separate features and labels
+X = df.iloc[:, :4].values  # First 4 columns
+y = df.iloc[:, 4].values   # Last column
 
 # Apply PCA to reduce to 2D for visualization
 pca = PCA(n_components=2)
@@ -15,8 +18,9 @@ X_pca = pca.fit_transform(X)
 
 # Project weights onto the PCA space
 # w_ampl is the weight vector from your AMPL solution
-w_ampl = np.array([2.73514, 1.50309, 2.32227, 2.28589])
-b_ampl = -4.3102
+w_ampl = np.array([2.14555, 2.16028, 2.0836, 2.17814])
+b_ampl = -4.34526
+
 
 # Transform the original weights into the PCA-reduced space
 w_pca = pca.transform([w_ampl])[0]  # Projecting the weights to 2D

@@ -12,7 +12,8 @@ reset;
 option solver minos;
 
 model dual.mod; #Load our model
-data .\processed_data\data_train_800.dat; #Load the training data
+#data .\processed_data\data_train_800.dat; #Load the training data
+data .\processed_data\data_train_8000.dat; #Load the training data
 	
 let C := 0.1; #Set regularization parameter
 
@@ -41,12 +42,16 @@ for {i in N} {
 }
 
 param b;
-if num_SV > 0 then {
-    let b := b_sum / num_SV;
-} else {
-    print "No support vectors found. Cannot compute b.";
-    exit 1;
-}
+let b := b_sum / num_SV;
+#if num_SV > 0 then {
+#    let b := b_sum / num_SV;
+#} else {
+#    print "No support vectors found. Cannot compute b.";
+#    exit 1;
+#}
+
+
+
 
 display w, b;
 
@@ -54,7 +59,8 @@ display w, b;
 # 2. Testing Phase
 # ========================================
 
-data .\processed_data\data_test_200.dat; #Load the training data
+#data .\processed_data\data_test_200.dat; #Load the training data
+data .\processed_data\data_test_2000.dat; #Load the training data
 
 # Make predictions using computed w and b
 param y_pred {i in N_test};

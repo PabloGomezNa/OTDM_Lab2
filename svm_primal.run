@@ -9,7 +9,8 @@ reset;
 option solver minos;
 
 model primal.mod; #Load our model
-data .\processed_data\data_train_800.dat; #Load the training data
+#data .\processed_data\data_train_80.dat; #Load the training data
+data .\processed_data\data_train_8000.dat; #Load the training data
 	
 let C := 0.1; #Set regularization parameter
 
@@ -22,7 +23,8 @@ display w, b; #Display the results, the weight and
 # ========================================
 
 #Load the test data
-data .\processed_data\data_test_200.dat;
+#data .\processed_data\data_test_20.dat;
+data .\processed_data\data_test_2000.dat; #Load the training data
 
 #Declare new variables we will use
 param correct_predictions;
