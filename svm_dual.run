@@ -44,6 +44,7 @@ for {i in N} {
 
 param b;
 let b := b_sum / num_SV;
+
 #if num_SV > 0 then {
 #    let b := b_sum / num_SV;
 #} else {

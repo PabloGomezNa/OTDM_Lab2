@@ -33,13 +33,16 @@ y = df.iloc[:, 4].values   # Last column
 pca = PCA(n_components=3)
 X_pca = pca.fit_transform(X)
 
-# Project the weights from AMPL solution into the PCA space (first three dimensions)
-w_ampl = np.array([2.14555, 2.16028, 2.0836, 2.17814])
-b_ampl = -4.34526
-
+# Original weights and intercept from AMPL solution
+w_ampl = np.array([3.6414, 3.99128, 3.64292, 3.95706])
+b_ampl = -7.66663
 
 # Transform the weights to the PCA space
 w_pca = pca.components_.dot(w_ampl)
+
+# Adjust the intercept to account for PCA centering
+x_mean = pca.mean_  # Mean of the original features used in PCA
+b_pca = np.dot(w_ampl, x_mean) + b_ampl
 
 # Plot the data in 3D
 fig = plt.figure(figsize=(10, 8))
@@ -55,11 +58,11 @@ for i in range(len(y)):
 # Create a meshgrid for decision boundary visualization
 x_min, x_max = X_pca[:, 0].min() - 1, X_pca[:, 0].max() + 1
 y_min, y_max = X_pca[:, 1].min() - 1, X_pca[:, 1].max() + 1
-z_min, z_max = X_pca[:, 2].min() - 1, X_pca[:, 2].max() + 1
 xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
 
 # Calculate the corresponding z values for the decision boundary
-zz = -(w_pca[0] * xx + w_pca[1] * yy + b_ampl) / w_pca[2]  # Using w_pca and b_ampl for the boundary
+# Adjusted intercept b_pca is used here
+zz = -(w_pca[0] * xx + w_pca[1] * yy + b_pca) / w_pca[2]
 
 # Plot the decision boundary
 ax.plot_surface(xx, yy, zz, color='k', alpha=0.3, edgecolor='none')
