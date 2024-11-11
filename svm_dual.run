@@ -1,5 +1,7 @@
 #.Run file that implements the DUAL SVM methods and calculates the accuracy
 
+#Every variable first must be defined as "param" and then make the  
+#thing with "let"
 reset;
 
 # ========================================
@@ -23,8 +25,12 @@ for {k in 1..n} {
 
 # Compute b using support vectors
 param b_values {i in N};
-param b_sum := 0;
-param num_SV := 0;
+
+param b_sum;
+let b_sum := 0;
+
+param num_SV;
+let num_SV := 0;
 
 for {i in N} {
     if alpha[i] > 1e-6 and alpha[i] < C - 1e-6 then {
@@ -53,12 +59,16 @@ data .\processed_data\data_test_200.dat; #Load the training data
 # Make predictions using computed w and b
 param y_pred {i in N_test};
 
+#Declare new variables we will use
+param correct_predictions;
+param accuracy;
+
 for {i in N_test} {
     let y_pred[i] := if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1;
 }
 
 # Calculate accuracy
-param correct_predictions := sum {i in N_test} (y_pred[i] = y_test[i]);
-param accuracy := correct_predictions / card(N_test);
+let correct_predictions := sum {i in N_test} (if y_test[i] = y_pred[i] then 1 else 0);
+let accuracy := correct_predictions / card(N_test);
 
 display correct_predictions, accuracy;

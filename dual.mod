@@ -15,3 +15,8 @@ maximize Obj:
 # Constraints
 subject to Balance:
     sum {i in N} alpha[i] * y[i] = 0;
+
+# Declarations for test data
+set N_test;
+param y_test {N_test};
+param X_test {N_test, 1..n};
