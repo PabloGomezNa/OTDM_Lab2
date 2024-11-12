@@ -7,7 +7,7 @@ library(dplyr)   # For data manipulation
 # Step 1: Read and Preprocess the Data
 
 # Define the path to the data file
-data_file <- './raw_data/data_1000.dat'  # Adjust the path as needed
+data_file <- './raw_data/data_10000.dat'  # Adjust the path as needed
 
 # Read the data, removing asterisks from the last column
 data <- read.table(data_file, header = FALSE, stringsAsFactors = FALSE)
@@ -27,13 +27,27 @@ X_pca <- pca_result$x[, 1:3]
 
 # Step 3: Original Weights and Intercept from AMPL Solutions
 
-# Primal SVM weights and intercept for C=1
-w_ampl_C1 <- c(3.6414, 3.99128, 3.64292, 3.95706)
-b_ampl_C1 <- -7.66663
+#SVM weights and intercept for C=1
+w_ampl_C1 <- c(4.79649, 4.83309, 4.65028, 4.72632)
+b_ampl_C1 <- -9.50918
 
-# Dual SVM weights and intercept for C=0.1
-w_ampl_C0.1 <- c(2.14555, 2.16028, 2.0836, 2.17814)
-b_ampl_C0.1 <- -4.34526
+
+#SVM weights and intercept for C=0.1
+w_ampl_C0.1 <- c(3.72937, 3.83253,3.61231,3.65965)
+b_ampl_C0.1 <- -7.42007
+
+
+#SVM weights and intercept for C=0.01
+w_ampl_C0.01 <- c(2.13421, 2.15276, 2.00367, 1.9872)
+b_ampl_C0.01 <- -4.14656
+
+#SVM weights and intercept for C=0.001
+w_ampl_C0.001 <- c(0.806408, 0.800807, 0.742297, 0.752737)
+b_ampl_C0.001 <- -1.61664
+
+#SVM weights and intercept for C=0.006
+w_ampl_C0.006 <- c(1.80426, 1.82329, 1.68535,  1.67539)
+b_ampl_C0.006 <- -3.50032
 
 # Step 4: Transform the Weights to the PCA Space
 
@@ -52,15 +66,30 @@ transform_hyperplane <- function(w, b, pca_rot, pca_mean) {
 pca_rot <- pca_result$rotation  # (4 x 3)
 pca_mean <- pca_result$center   # Vector of length 4
 
-# Transform primal hyperplane (C=1)
-transformed_primal <- transform_hyperplane(w_ampl_C1, b_ampl_C1, pca_rot, pca_mean)
-w_pca_primal <- transformed_primal$w_pca
-b_pca_primal <- transformed_primal$b_pca
+# Transform  hyperplane (C=1)
+transformed_C1 <- transform_hyperplane(w_ampl_C1, b_ampl_C1, pca_rot, pca_mean)
+w_pca_C1 <- transformed_C1$w_pca
+b_pca_C1 <- transformed_C1$b_pca
 
-# Transform dual hyperplane (C=0.1)
-transformed_dual <- transform_hyperplane(w_ampl_C0.1, b_ampl_C0.1, pca_rot, pca_mean)
-w_pca_dual <- transformed_dual$w_pca
-b_pca_dual <- transformed_dual$b_pca
+# Transform  hyperplane (C=0.1)
+transformed_C0.1 <- transform_hyperplane(w_ampl_C0.1, b_ampl_C0.1, pca_rot, pca_mean)
+w_pca_C0.1 <- transformed_C0.1$w_pca
+b_pca_C0.1 <- transformed_C0.1$b_pca
+
+# Transform  hyperplane (C=0.01)
+transformed_C0.01 <- transform_hyperplane(w_ampl_C0.01, b_ampl_C0.01, pca_rot, pca_mean)
+w_pca_C0.01 <- transformed_C0.01$w_pca
+b_pca_C0.01 <- transformed_C0.01$b_pca
+
+# Transform  hyperplane (C=0.001)
+transformed_C0.001 <- transform_hyperplane(w_ampl_C0.001, b_ampl_C0.001, pca_rot, pca_mean)
+w_pca_C0.001 <- transformed_C0.001$w_pca
+b_pca_C0.001 <- transformed_C0.001$b_pca
+
+# Transform  hyperplane (C=0.006)
+transformed_C0.006 <- transform_hyperplane(w_ampl_C0.006, b_ampl_C0.006, pca_rot, pca_mean)
+w_pca_C0.006 <- transformed_C0.006$w_pca
+b_pca_C0.006 <- transformed_C0.006$b_pca
 
 # Step 5: Prepare Data for Plotting
 
@@ -93,11 +122,20 @@ create_meshgrid <- function(w_pca, b_pca) {
   return(grid)
 }
 
-# Create meshgrid for primal hyperplane (C=1)
-grid_primal <- create_meshgrid(w_pca_primal, b_pca_primal)
+# Create meshgrid for hyperplane (C=1)
+grid_C1 <- create_meshgrid(w_pca_C1, b_pca_C1)
 
-# Create meshgrid for dual hyperplane (C=0.1)
-grid_dual <- create_meshgrid(w_pca_dual, b_pca_dual)
+# Create meshgrid for hyperplane (C=0.1)
+grid_C0.1 <- create_meshgrid(w_pca_C0.1, b_pca_C0.1)
+
+# Create meshgrid for hyperplane (C=0.01)
+grid_C0.01 <- create_meshgrid(w_pca_C0.01, b_pca_C0.01)
+
+# Create meshgrid for  hyperplane (C=0.001)
+grid_C0.001 <- create_meshgrid(w_pca_C0.001, b_pca_C0.001)
+
+# Create meshgrid for  hyperplane (C=0.006)
+grid_C0.006 <- create_meshgrid(w_pca_C0.006, b_pca_C0.006)
 
 # Step 7: Plot the Data and Both Decision Boundaries in 3D
 
@@ -126,21 +164,51 @@ fig <- fig %>% add_trace(
 
 # Add the primal decision boundary surface (C=1)
 fig <- fig %>% add_trace(
-  x = grid_primal$PC1, y = grid_primal$PC2, z = grid_primal$PC3,
+  x = grid_C1$PC1, y = grid_C1$PC2, z = grid_C1$PC3,
   type = 'mesh3d',
   opacity = 0.3,
   color = 'green',
-  name = 'Primal Hyperplane (C=1)',
+  name = 'Hyp. C=1',
   showscale = FALSE
 )
 
 # Add the dual decision boundary surface (C=0.1)
 fig <- fig %>% add_trace(
-  x = grid_dual$PC1, y = grid_dual$PC2, z = grid_dual$PC3,
+  x = grid_C0.1$PC1, y = grid_C0.1$PC2, z = grid_C0.1$PC3,
   type = 'mesh3d',
   opacity = 0.3,
   color = 'purple',
-  name = 'Dual Hyperplane (C=0.1)',
+  name = 'Hyp. C=0.1',
+  showscale = FALSE
+)
+
+# Add the dual decision boundary surface (C=0.01)
+fig <- fig %>% add_trace(
+  x = grid_C0.01$PC1, y = grid_C0.01$PC2, z = grid_C0.01$PC3,
+  type = 'mesh3d',
+  opacity = 0.3,
+  color = 'lightgreen',
+  name = 'Hyp. C=0.01',
+  showscale = FALSE
+)
+
+# Add the dual decision boundary surface (C=0.001)
+fig <- fig %>% add_trace(
+  x = grid_C0.001$PC1, y = grid_C0.001$PC2, z = grid_C0.001$PC3,
+  type = 'mesh3d',
+  opacity = 0.3,
+  color = 'lightyellow',
+  name = 'Hyp. C=0.001',
+  showscale = FALSE
+)
+
+# Add the dual decision boundary surface (C=0.006)
+fig <- fig %>% add_trace(
+  x = grid_C0.001$PC1, y = grid_C0.006$PC2, z = grid_C0.006$PC3,
+  type = 'mesh3d',
+  opacity = 0.3,
+  color = 'yellow',
+  name = 'Hyp. C=0.006',
   showscale = FALSE
 )
 
@@ -151,7 +219,7 @@ fig <- fig %>% layout(
     yaxis = list(title = 'PCA Component 2'),
     zaxis = list(title = 'PCA Component 3')
   ),
-  title = 'SVM Decision Boundaries (Primal C=1 and Dual C=0.1) in 3D PCA Space'
+  title = 'SVM Decision Boundaries in 3D PCA'
 )
 
 # Display the plot
