@@ -6,7 +6,7 @@ def read_ampl_data(file_path):
     with open(file_path, 'r') as file:
         data = file.read()
 
-    print(data)
+    #print(data)
     #Extract the value of the total set N
     N_match = re.search(r'set\s+N\s*:=\s*(.+?);', data, re.DOTALL)
     N_list = N_match.group(1).split()
@@ -76,9 +76,9 @@ def split_data(N, y, X, test_size):
 
 def main():
     # File paths from the input and where to store the train and test
-    input_file = r'.\processed_data\Student_performance_data.dat' 
-    train_file = r'.\processed_data\Student_performance_train_data.dat'
-    test_file = r'.\processed_data\Student_performance_test_data.dat'
+    input_file = r'.\processed_data\data_processed_2000.dat' 
+    train_file = r'.\processed_data\data_train_1600.dat'
+    test_file = r'.\processed_data\data_test_400.dat'
 
     test_prop = 0.2 # Proportion for test/train split
     #Read data

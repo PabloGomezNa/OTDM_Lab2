@@ -1,4 +1,4 @@
-# convert_to_ampl_dat.py. This oly works for the files generated bt the gensvmdat.exe as its only 4 dimensions and always have 
+# convert_to_ampl_dat.py. This only works for the files generated bt the gensvmdat.exe as its only 4 dimensions and always have 
 #the same format
 
 import sys

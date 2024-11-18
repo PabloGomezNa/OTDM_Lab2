@@ -1,0 +1,304 @@
+reset;
+
+# ========================================
+# Entrenamiento y Evaluación para múltiples valores de C
+# ========================================
+
+print "--------------------- Synthetic 100 samples ---------------------";
+
+# Seleccionar el solver a utilizar
+option solver minos;
+
+# Definir el modelo
+model dual.mod;
+
+# Cargar el conjunto de datos para entrenamiento
+data .\processed_data\data_train_80.dat;
+
+# Lista de valores comunes para C
+set C_VALUES := {0.001, 0.01, 0.1, 1, 10, 100};
+
+# Declarar parámetros para almacenar resultados
+param correct_predictions;
+param accuracy;
+param accuracy_results {C_VALUES};
+param correct_predictions_res {C_VALUES};
+
+# Declarar parámetros necesarios para el cálculo de w y b
+param w {1..n};
+param b_values {i in N};
+param b_sum;
+param num_SV;
+param b;
+param y_pred {i in N_test};
+
+# Cargar datos de prueba una vez (más eficiente si los datos de prueba no cambian)
+data .\processed_data\data_test_20.dat;
+
+# Iterar sobre los valores de C
+for {c_val in C_VALUES} {
+    let C := c_val; # Establecer el parámetro de regularización actual
+    solve; # Resolver el problema de optimización
+
+    # Verificar el éxito del solver
+    if solve_result_num != 0 then {
+        display "Solver failed for C =", c_val;
+        continue; # Saltar a la siguiente iteración
+    }
+
+    # Calcular w a partir de alpha, y y X
+    for {k in 1..n} {
+        let w[k] := sum {i in N} alpha[i] * y[i] * X[i,k];
+    }
+
+    # Calcular b usando vectores de soporte
+    let b_sum := 0;
+    let num_SV := 0;
+
+    for {i in N} {
+        if alpha[i] > 1e-6 and alpha[i] < C - 1e-6 then {
+            let b_values[i] := y[i] - sum {j in N} alpha[j] * y[j] * (sum {k in 1..n} X[j,k] * X[i,k]);
+            let b_sum := b_sum + b_values[i];
+            let num_SV := num_SV + 1;
+        }
+    }
+
+    if num_SV > 0 then {
+        let b := b_sum / num_SV;
+    } else {
+        print "No support vectors found. Cannot compute b for C =", c_val;
+        continue; # Saltar a la siguiente iteración
+    }
+
+    # Hacer predicciones usando w y b calculados
+    for {i in N_test} {
+        let y_pred[i] := if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1;
+    }
+
+    # Calcular precisión
+    let correct_predictions := sum {i in N_test} (if y_test[i] = y_pred[i] then 1 else 0);
+    let accuracy := correct_predictions / card(N_test);
+    let accuracy_results[c_val] := accuracy; 
+    let correct_predictions_res[c_val] := correct_predictions;
+}
+print "Test results for 20 samples";
+# Mostrar los resultados de precisión para todos los valores de C
+display accuracy_results;
+display correct_predictions_res;
+
+# ---------------- Synthetic 1000 samples ----------------
+
+reset;
+print "--------------------- Synthetic 1000 samples ---------------------";
+
+# Seleccionar el solver a utilizar
+option solver minos;
+
+# Definir el modelo
+model dual.mod;
+
+# Cargar el conjunto de datos para entrenamiento
+data .\processed_data\data_train_800.dat;
+
+# Lista de valores comunes para C
+set C_VALUES := {0.001, 0.01, 0.1, 1, 10, 100};
+
+# Declarar parámetros para almacenar resultados
+param correct_predictions;
+param accuracy;
+param accuracy_results {C_VALUES};
+param correct_predictions_res {C_VALUES};
+
+# Declarar parámetros necesarios para el cálculo de w y b
+param w {1..n};
+param b_values {i in N};
+param b_sum;
+param num_SV;
+param b;
+param y_pred {i in N_test};
+
+# Cargar datos de prueba
+data .\processed_data\data_test_200.dat;
+
+# Iterar sobre los valores de C
+for {c_val in C_VALUES} {
+    let C := c_val;
+    solve;
+
+    if solve_result_num != 0 then {
+        display "Solver failed for C =", c_val;
+        continue;
+    }
+
+    for {k in 1..n} {
+        let w[k] := sum {i in N} alpha[i] * y[i] * X[i,k];
+    }
+
+    let b_sum := 0;
+    let num_SV := 0;
+
+    for {i in N} {
+        if alpha[i] > 1e-6 and alpha[i] < C - 1e-6 then {
+            let b_values[i] := y[i] - sum {j in N} alpha[j] * y[j] * (sum {k in 1..n} X[j,k] * X[i,k]);
+            let b_sum := b_sum + b_values[i];
+            let num_SV := num_SV + 1;
+        }
+    }
+
+    if num_SV > 0 then {
+        let b := b_sum / num_SV;
+    } else {
+        print "No support vectors found. Cannot compute b for C =", c_val;
+        continue;
+    }
+
+    for {i in N_test} {
+        let y_pred[i] := if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1;
+    }
+
+    let correct_predictions := sum {i in N_test} (if y_test[i] = y_pred[i] then 1 else 0);
+    let accuracy := correct_predictions / card(N_test);
+    let accuracy_results[c_val] := accuracy;
+    let correct_predictions_res[c_val] := correct_predictions;
+}
+print "Test results for 200 samples";
+display accuracy_results;
+display correct_predictions_res;
+
+# ---------------- Synthetic 2000 samples ----------------
+
+reset;
+print "--------------------- Synthetic 2000 samples ---------------------";
+
+option solver minos;
+model dual.mod;
+data .\processed_data\data_train_1600.dat;
+
+set C_VALUES := {0.001, 0.01, 0.1, 1, 10, 100};
+
+param correct_predictions;
+param accuracy;
+param accuracy_results {C_VALUES};
+param correct_predictions_res {C_VALUES};
+
+param w {1..n};
+param b_values {i in N};
+param b_sum;
+param num_SV;
+param b;
+param y_pred {i in N_test};
+
+data .\processed_data\data_test_400.dat;
+
+for {c_val in C_VALUES} {
+    let C := c_val;
+    solve;
+
+    if solve_result_num != 0 then {
+        display "Solver failed for C =", c_val;
+        continue;
+    }
+
+    for {k in 1..n} {
+        let w[k] := sum {i in N} alpha[i] * y[i] * X[i,k];
+    }
+
+    let b_sum := 0;
+    let num_SV := 0;
+
+    for {i in N} {
+        if alpha[i] > 1e-6 and alpha[i] < C - 1e-6 then {
+            let b_values[i] := y[i] - sum {j in N} alpha[j] * y[j] * (sum {k in 1..n} X[j,k] * X[i,k]);
+            let b_sum := b_sum + b_values[i];
+            let num_SV := num_SV + 1;
+        }
+    }
+
+    if num_SV > 0 then {
+        let b := b_sum / num_SV;
+    } else {
+        print "No support vectors found. Cannot compute b for C =", c_val;
+        continue;
+    }
+
+    for {i in N_test} {
+        let y_pred[i] := if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1;
+    }
+
+    let correct_predictions := sum {i in N_test} (if y_test[i] = y_pred[i] then 1 else 0);
+    let accuracy := correct_predictions / card(N_test);
+    let accuracy_results[c_val] := accuracy;
+    let correct_predictions_res[c_val] := correct_predictions;
+}
+print "Test results for 400 samples";
+display accuracy_results;
+display correct_predictions_res;
+
+# ---------------- Student Dataset ----------------
+
+reset;
+print "--------------------- Student Dataset ---------------------";
+
+option solver minos;
+model dual.mod;
+data .\processed_data\Student_performance_train_data.dat;
+
+set C_VALUES := {0.001, 0.01, 0.1, 1, 10, 100};
+
+param correct_predictions;
+param accuracy;
+param accuracy_results {C_VALUES};
+param correct_predictions_res {C_VALUES};
+
+param w {1..n};
+param b_values {i in N};
+param b_sum;
+param num_SV;
+param b;
+param y_pred {i in N_test};
+
+data .\processed_data\Student_performance_test_data.dat;
+
+for {c_val in C_VALUES} {
+    let C := c_val;
+    solve;
+
+    if solve_result_num != 0 then {
+        display "Solver failed for C =", c_val;
+        continue;
+    }
+
+    for {k in 1..n} {
+        let w[k] := sum {i in N} alpha[i] * y[i] * X[i,k];
+    }
+
+    let b_sum := 0;
+    let num_SV := 0;
+
+    for {i in N} {
+        if alpha[i] > 1e-6 and alpha[i] < C - 1e-6 then {
+            let b_values[i] := y[i] - sum {j in N} alpha[j] * y[j] * (sum {k in 1..n} X[j,k] * X[i,k]);
+            let b_sum := b_sum + b_values[i];
+            let num_SV := num_SV + 1;
+        }
+    }
+
+    if num_SV > 0 then {
+        let b := b_sum / num_SV;
+    } else {
+        print "No support vectors found. Cannot compute b for C =", c_val;
+        continue;
+    }
+
+    for {i in N_test} {
+        let y_pred[i] := if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1;
+    }
+
+    let correct_predictions := sum {i in N_test} (if y_test[i] = y_pred[i] then 1 else 0);
+    let accuracy := correct_predictions / card(N_test);
+    let accuracy_results[c_val] := accuracy;
+    let correct_predictions_res[c_val] := correct_predictions;
+}
+print "Test results Student Dataset";
+display accuracy_results;
+display correct_predictions_res;

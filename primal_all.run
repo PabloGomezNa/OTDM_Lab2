@@ -1,0 +1,202 @@
+reset;
+
+# ========================================
+# Train and Evaluate for multiple C values
+# ========================================
+
+print "--------------------- Synthetic 100 samples ---------------------";
+
+# Select the solver to use
+option solver minos;
+
+# Define the model
+model primal.mod;
+
+# Load the dataset for training
+data .\processed_data\data_train_80.dat;
+
+# List of common values for C
+set C_VALUES := {0.001, 0.01, 0.1, 1, 10, 100};
+
+# Declare parameters for storing results
+param correct_predictions;
+param accuracy;
+param accuracy_results {C_VALUES};
+param correct_predictions_res {C_VALUES};
+
+# Load test data once (more efficient if test data doesn't change)
+data .\processed_data\data_test_20.dat;
+
+# Iterate over values of C
+for {c_val in C_VALUES} {
+    let C := c_val; # Set the current regularization parameter
+    solve; # Solve the optimization problem
+
+    # Check for solver success
+    if solve_result_num != 0 then {
+        display "Solver failed for C =", c_val;
+        continue; # Skip to the next iteration
+    }
+
+    # Calculate predictions and accuracy
+    let correct_predictions := sum {i in N_test} 
+        (if y_test[i] = (if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1) 
+        then 1 else 0);
+    let accuracy := correct_predictions / card(N_test);
+    let accuracy_results[c_val] := accuracy; 
+    let correct_predictions_res[c_val] := correct_predictions;
+}
+print "Test results for 20 samples";
+# Display the accuracy results for all C values
+display accuracy_results;
+display correct_predictions_res;
+
+# ---------------- Synthetic 1000 samples ----------------
+
+reset;
+print "--------------------- Synthetic 1000 samples ---------------------";
+
+# Select the solver to use
+option solver minos;
+
+# Define the model
+model primal.mod;
+
+# Load the dataset for training
+data .\processed_data\data_train_800.dat;
+
+# List of common values for C
+set C_VALUES := {0.001, 0.01, 0.1, 1, 10, 100};
+
+# Declare parameters for storing results
+param correct_predictions;
+param accuracy;
+param accuracy_results {C_VALUES};
+param correct_predictions_res {C_VALUES};
+
+# Load test data once (more efficient if test data doesn't change)
+data .\processed_data\data_test_200.dat;
+
+# Iterate over values of C
+for {c_val in C_VALUES} {
+    let C := c_val; # Set the current regularization parameter
+    solve; # Solve the optimization problem
+
+    # Check for solver success
+    if solve_result_num != 0 then {
+        display "Solver failed for C =", c_val;
+        continue; # Skip to the next iteration
+    }
+
+    # Calculate predictions and accuracy
+    let correct_predictions := sum {i in N_test} 
+        (if y_test[i] = (if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1) 
+        then 1 else 0);
+    let accuracy := correct_predictions / card(N_test);
+    let accuracy_results[c_val] := accuracy; 
+    let correct_predictions_res[c_val] := correct_predictions;
+}
+print "Test results for 200 samples";
+# Display the accuracy results for all C values
+display accuracy_results;
+display correct_predictions_res;
+
+# ---------------- Synthetic 10000 samples ----------------
+
+reset;
+print "--------------------- Synthetic 2000 samples ---------------------";
+
+# Select the solver to use
+option solver minos;
+
+# Define the model
+model primal.mod;
+
+# Load the dataset for training
+data .\processed_data\data_train_1600.dat;
+
+# List of common values for C
+set C_VALUES := {0.001, 0.01, 0.1, 1, 10, 100};
+
+# Declare parameters for storing results
+param correct_predictions;
+param accuracy;
+param accuracy_results {C_VALUES};
+param correct_predictions_res {C_VALUES};
+
+# Load test data once (more efficient if test data doesn't change)
+data .\processed_data\data_test_400.dat;
+
+# Iterate over values of C
+for {c_val in C_VALUES} {
+    let C := c_val; # Set the current regularization parameter
+    solve; # Solve the optimization problem
+
+    # Check for solver success
+    if solve_result_num != 0 then {
+        display "Solver failed for C =", c_val;
+        continue; # Skip to the next iteration
+    }
+
+    # Calculate predictions and accuracy
+    let correct_predictions := sum {i in N_test} 
+        (if y_test[i] = (if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1) 
+        then 1 else 0);
+    let accuracy := correct_predictions / card(N_test);
+    let accuracy_results[c_val] := accuracy; 
+    let correct_predictions_res[c_val] := correct_predictions;
+}
+print "Test results for 400 samples";
+# Display the accuracy results for all C values
+display accuracy_results;
+display correct_predictions_res;
+
+# ---------------- Student Dataset ----------------
+
+reset;
+print "--------------------- Student Dataset ---------------------";
+
+# Select the solver to use
+option solver minos;
+
+# Define the model
+model primal.mod;
+
+# Load the dataset for training
+data .\processed_data\Student_performance_train_data.dat;
+
+# List of common values for C
+set C_VALUES := {0.001, 0.01, 0.1, 1, 10, 100};
+
+# Declare parameters for storing results
+param correct_predictions;
+param accuracy;
+param accuracy_results {C_VALUES};
+param correct_predictions_res {C_VALUES};
+
+# Load test data once (more efficient if test data doesn't change)
+data .\processed_data\Student_performance_test_data.dat;
+
+# Iterate over values of C
+for {c_val in C_VALUES} {
+    let C := c_val; # Set the current regularization parameter
+    solve; # Solve the optimization problem
+
+    # Check for solver success
+    if solve_result_num != 0 then {
+        display "Solver failed for C =", c_val;
+        continue; # Skip to the next iteration
+    }
+
+    # Calculate predictions and accuracy
+    let correct_predictions := sum {i in N_test} 
+        (if y_test[i] = (if sum {j in 1..n} w[j] * X_test[i,j] + b >= 0 then 1 else -1) 
+        then 1 else 0);
+    let accuracy := correct_predictions / card(N_test);
+    let accuracy_results[c_val] := accuracy; 
+    let correct_predictions_res[c_val] := correct_predictions;
+}
+print "Test results Student Dataset";
+# Display the accuracy results for all C values
+display accuracy_results;
+display correct_predictions_res;
