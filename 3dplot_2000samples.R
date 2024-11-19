@@ -4,52 +4,37 @@ if (!require("dplyr")) install.packages("dplyr", dependencies=TRUE)
 library(plotly)  # For interactive 3D plotting
 library(dplyr)   # For data manipulation
 
-# Step 1: Read and Preprocess the Data
 
 # Define the path to the data file
-data_file <- './raw_data/data_10000.dat'  # Adjust the path as needed
+data_file <- './raw_data/data_2000.dat'  # Adjust the path as needed
 
 # Read the data, removing asterisks from the last column
 data <- read.table(data_file, header = FALSE, stringsAsFactors = FALSE)
-
-# Remove asterisks from the last column (labels)
 data$V5 <- as.numeric(gsub('\\*', '', data$V5))
 
 # Separate features and labels
 X <- as.matrix(data[, 1:4])  # Features (columns 1 to 4)
 y <- data$V5                 # Labels (column 5)
 
-# Step 2: Apply PCA to Reduce Dimensions to 3
+#Apply PCA to Reduce Dimensions to 3
 pca_result <- prcomp(X, center = TRUE, scale. = FALSE)
-
-# Get the PCA-transformed data (first 3 principal components)
 X_pca <- pca_result$x[, 1:3]
 
-# Step 3: Original Weights and Intercept from AMPL Solutions
 
 #SVM weights and intercept for C=1
-w_ampl_C1 <- c(4.79649, 4.83309, 4.65028, 4.72632)
-b_ampl_C1 <- -9.50918
-
-
-#SVM weights and intercept for C=0.1
-w_ampl_C0.1 <- c(3.72937, 3.83253,3.61231,3.65965)
-b_ampl_C0.1 <- -7.42007
-
-
-#SVM weights and intercept for C=0.01
-w_ampl_C0.01 <- c(2.13421, 2.15276, 2.00367, 1.9872)
-b_ampl_C0.01 <- -4.14656
+w_ampl_C1 <- c(3.87164,  4.4871, 4.13619, 4.11397)
+b_ampl_C1 <- -8.38208
 
 #SVM weights and intercept for C=0.001
-w_ampl_C0.001 <- c(0.806408, 0.800807, 0.742297, 0.752737)
-b_ampl_C0.001 <- -1.61664
+w_ampl_C0.001 <- c(0.144983, 0.177873, 0.139131, 0.165672)
+b_ampl_C0.001 <- -1.13012
 
-#SVM weights and intercept for C=0.006
-w_ampl_C0.006 <- c(1.80426, 1.82329, 1.68535,  1.67539)
-b_ampl_C0.006 <- -3.50032
 
-# Step 4: Transform the Weights to the PCA Space
+#SVM weights and intercept for C=100
+w_ampl_C100 <- c(4.63418, 5.22565, 4.83422, 4.88741)
+b_ampl_C100 <- -9.86648
+
+
 
 # Function to transform weights and intercept into PCA space
 transform_hyperplane <- function(w, b, pca_rot, pca_mean) {
@@ -71,15 +56,7 @@ transformed_C1 <- transform_hyperplane(w_ampl_C1, b_ampl_C1, pca_rot, pca_mean)
 w_pca_C1 <- transformed_C1$w_pca
 b_pca_C1 <- transformed_C1$b_pca
 
-# Transform  hyperplane (C=0.1)
-transformed_C0.1 <- transform_hyperplane(w_ampl_C0.1, b_ampl_C0.1, pca_rot, pca_mean)
-w_pca_C0.1 <- transformed_C0.1$w_pca
-b_pca_C0.1 <- transformed_C0.1$b_pca
 
-# Transform  hyperplane (C=0.01)
-transformed_C0.01 <- transform_hyperplane(w_ampl_C0.01, b_ampl_C0.01, pca_rot, pca_mean)
-w_pca_C0.01 <- transformed_C0.01$w_pca
-b_pca_C0.01 <- transformed_C0.01$b_pca
 
 # Transform  hyperplane (C=0.001)
 transformed_C0.001 <- transform_hyperplane(w_ampl_C0.001, b_ampl_C0.001, pca_rot, pca_mean)
@@ -87,11 +64,10 @@ w_pca_C0.001 <- transformed_C0.001$w_pca
 b_pca_C0.001 <- transformed_C0.001$b_pca
 
 # Transform  hyperplane (C=0.006)
-transformed_C0.006 <- transform_hyperplane(w_ampl_C0.006, b_ampl_C0.006, pca_rot, pca_mean)
-w_pca_C0.006 <- transformed_C0.006$w_pca
-b_pca_C0.006 <- transformed_C0.006$b_pca
+transformed_C0.100 <- transform_hyperplane(w_ampl_C100, b_ampl_C100, pca_rot, pca_mean)
+w_pca_C100 <- transformed_C100$w_pca
+b_pca_C100 <- transformed_C100$b_pca
 
-# Step 5: Prepare Data for Plotting
 
 # Map labels to descriptive strings
 plot_data <- data.frame(
@@ -104,7 +80,6 @@ plot_data <- data.frame(
 # Convert Label to factor to ensure correct ordering
 plot_data$Label <- factor(plot_data$Label, levels = c('Class -1', 'Class 1'))
 
-# Step 6: Create Meshgrids for Both Decision Boundaries
 
 # Function to create meshgrid and calculate PC3 for the hyperplane
 create_meshgrid <- function(w_pca, b_pca) {
@@ -125,19 +100,18 @@ create_meshgrid <- function(w_pca, b_pca) {
 # Create meshgrid for hyperplane (C=1)
 grid_C1 <- create_meshgrid(w_pca_C1, b_pca_C1)
 
-# Create meshgrid for hyperplane (C=0.1)
-grid_C0.1 <- create_meshgrid(w_pca_C0.1, b_pca_C0.1)
-
-# Create meshgrid for hyperplane (C=0.01)
-grid_C0.01 <- create_meshgrid(w_pca_C0.01, b_pca_C0.01)
+# # Create meshgrid for hyperplane (C=0.1)
+# grid_C0.1 <- create_meshgrid(w_pca_C0.1, b_pca_C0.1)
+# 
+# # Create meshgrid for hyperplane (C=0.01)
+# grid_C0.01 <- create_meshgrid(w_pca_C0.01, b_pca_C0.01)
 
 # Create meshgrid for  hyperplane (C=0.001)
 grid_C0.001 <- create_meshgrid(w_pca_C0.001, b_pca_C0.001)
 
 # Create meshgrid for  hyperplane (C=0.006)
-grid_C0.006 <- create_meshgrid(w_pca_C0.006, b_pca_C0.006)
+grid_C0.006 <- create_meshgrid(w_pca_C100, b_pca_C100)
 
-# Step 7: Plot the Data and Both Decision Boundaries in 3D
 
 # Create the plot
 fig <- plot_ly()
@@ -169,46 +143,19 @@ fig <- fig %>% add_trace(
   opacity = 0.3,
   color = 'green',
   name = 'Hyp. C=1',
+  showlegend = TRUE,
   showscale = FALSE
 )
 
-# Add the dual decision boundary surface (C=0.1)
-fig <- fig %>% add_trace(
-  x = grid_C0.1$PC1, y = grid_C0.1$PC2, z = grid_C0.1$PC3,
-  type = 'mesh3d',
-  opacity = 0.3,
-  color = 'purple',
-  name = 'Hyp. C=0.1',
-  showscale = FALSE
-)
 
-# Add the dual decision boundary surface (C=0.01)
+# Add the dual decision boundary surface (C=100)
 fig <- fig %>% add_trace(
-  x = grid_C0.01$PC1, y = grid_C0.01$PC2, z = grid_C0.01$PC3,
-  type = 'mesh3d',
-  opacity = 0.3,
-  color = 'lightgreen',
-  name = 'Hyp. C=0.01',
-  showscale = FALSE
-)
-
-# Add the dual decision boundary surface (C=0.001)
-fig <- fig %>% add_trace(
-  x = grid_C0.001$PC1, y = grid_C0.001$PC2, z = grid_C0.001$PC3,
-  type = 'mesh3d',
-  opacity = 0.3,
-  color = 'lightyellow',
-  name = 'Hyp. C=0.001',
-  showscale = FALSE
-)
-
-# Add the dual decision boundary surface (C=0.006)
-fig <- fig %>% add_trace(
-  x = grid_C0.001$PC1, y = grid_C0.006$PC2, z = grid_C0.006$PC3,
+  x = grid_C100$PC1, y = grid_C100$PC2, z = grid_C100$PC3,
   type = 'mesh3d',
   opacity = 0.3,
   color = 'yellow',
-  name = 'Hyp. C=0.006',
+  name = 'Hyp. C=100',
+  showlegend=TRUE ,
   showscale = FALSE
 )
 

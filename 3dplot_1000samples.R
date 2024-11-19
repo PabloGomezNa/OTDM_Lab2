@@ -4,7 +4,6 @@ if (!require("dplyr")) install.packages("dplyr", dependencies=TRUE)
 library(plotly)  # For interactive 3D plotting
 library(dplyr)   # For data manipulation
 
-# Step 1: Read and Preprocess the Data
 
 # Define the path to the data file
 data_file <- './raw_data/data_1000.dat'  # Adjust the path as needed
@@ -19,13 +18,10 @@ data$V5 <- as.numeric(gsub('\\*', '', data$V5))
 X <- as.matrix(data[, 1:4])  # Features (columns 1 to 4)
 y <- data$V5                 # Labels (column 5)
 
-# Step 2: Apply PCA to Reduce Dimensions to 3
+# Apply PCA to Reduce Dimensions to 3
 pca_result <- prcomp(X, center = TRUE, scale. = FALSE)
-
-# Get the PCA-transformed data (first 3 principal components)
 X_pca <- pca_result$x[, 1:3]
 
-# Step 3: Original Weights and Intercept from AMPL Solutions
 
 #SVM weights and intercept for C=1
 w_ampl_C1 <- c(3.6414, 3.99128, 3.64292, 3.95706)
@@ -43,7 +39,6 @@ b_ampl_C0.001 <- -1.07347
 w_ampl_C0.006 <- c(0.424086,0.48822,0.4671,0.489834)
 b_ampl_C0.006 <- -1.4408
 
-# Step 4: Transform the Weights to the PCA Space
 
 # Function to transform weights and intercept into PCA space
 transform_hyperplane <- function(w, b, pca_rot, pca_mean) {
@@ -55,8 +50,6 @@ transform_hyperplane <- function(w, b, pca_rot, pca_mean) {
   
   return(list(w_pca = w_pca, b_pca = b_pca))
 }
-
-# Get PCA rotation matrix and mean
 pca_rot <- pca_result$rotation  # (4 x 3)
 pca_mean <- pca_result$center   # Vector of length 4
 
@@ -80,20 +73,17 @@ transformed_C0.006 <- transform_hyperplane(w_ampl_C0.006, b_ampl_C0.006, pca_rot
 w_pca_C0.006 <- transformed_C0.006$w_pca
 b_pca_C0.006 <- transformed_C0.006$b_pca
 
-# Step 5: Prepare Data for Plotting
 
-# Map labels to descriptive strings
+# Map labels to  strings 
 plot_data <- data.frame(
   PC1 = X_pca[, 1],
   PC2 = X_pca[, 2],
   PC3 = X_pca[, 3],
   Label = ifelse(y == -1, 'Class -1', 'Class 1')
 )
-
-# Convert Label to factor to ensure correct ordering
 plot_data$Label <- factor(plot_data$Label, levels = c('Class -1', 'Class 1'))
 
-# Step 6: Create Meshgrids for Both Decision Boundaries
+#Now we need to create Meshgrids for Both Decision Boundaries
 
 # Function to create meshgrid and calculate PC3 for the hyperplane
 create_meshgrid <- function(w_pca, b_pca) {
@@ -122,8 +112,6 @@ grid_C0.001 <- create_meshgrid(w_pca_C0.001, b_pca_C0.001)
 
 # Create meshgrid for  hyperplane (C=0.006)
 grid_C0.006 <- create_meshgrid(w_pca_C0.006, b_pca_C0.006)
-
-# Step 7: Plot the Data and Both Decision Boundaries in 3D
 
 # Create the plot
 fig <- plot_ly()
